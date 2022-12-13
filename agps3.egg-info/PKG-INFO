@@ -1,3 +1,20 @@
+Metadata-Version: 2.1
+Name: agps3
+Version: 0.36.1
+Summary: Python client for gpsd
+Home-page: https://github.com/kenjfox/agps3
+Download-URL: https://github.com/kenjfox/agps3/archive/main.zip
+Author: Ken Fox
+Author-email: Ken Fox <kenjfox@yahoo.com>
+Project-URL: Homepage, https://github.com/kenjfox/agps3
+Project-URL: Bug Tracker, https://github.com/kenjfox/agps3/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
 #### README #####
 This package is based on a fork of gps3 (https://github.com/wadda/gps3) which hasn't been updated in a while.  
 It includes some bug fixes for GST class handling.

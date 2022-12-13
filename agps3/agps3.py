@@ -4,7 +4,7 @@
 agps3.py is a Python 2.7-3.5 GPSD interface (http://www.catb.org/gpsd)
 Defaults host='127.0.0.1', port=2947, gpsd_protocol='json' in two classes.
 
-1) 'GPSDSocket' creates a GPSD socket connection & request/retrieve GPSD output.
+1) '' creates a GPSD socket connection & request/retrieve GPSD output.
 2) 'DataStream' unpacks the streamed gpsd data into object attribute values.
 
 Import          from gps3 import agps3
@@ -28,14 +28,14 @@ import select
 import socket
 import sys
 
-__author__ = 'Moe'
-__copyright__ = 'Copyright 2015-2017  Moe'
-__license__ = 'MIT'
-__version__ = '0.35'
+__author__ = "Moe"
+__copyright__ = "Copyright 2015-2017  Moe"
+__license__ = "MIT"
+__version__ = "0.35"
 
-HOST = '127.0.0.1'  # gpsd
+HOST = "127.0.0.1"  # gpsd
 GPSD_PORT = 2947  # defaults
-PROTOCOL = 'json'  # "
+PROTOCOL = "json"  # "
 
 
 class GPSDSocket(object):
@@ -58,8 +58,10 @@ class GPSDSocket(object):
                 self.streamSock.connect(host_port)
                 self.streamSock.setblocking(False)
             except (OSError, IOError) as error:
-                sys.stderr.write(f'\r\nGPSDSocket.connect exception is--> {error}')
-                sys.stderr.write(f'\r\nAGPS3 connection to gpsd at \'{host}\' on port \'{port}\' failed\r\n')
+                sys.stderr.write(f"\r\nGPSDSocket.connect exception is--> {error}")
+                sys.stderr.write(
+                    f"\r\nAGPS3 connection to gpsd at '{host}' on port '{port}' failed\r\n"
+                )
 
     def watch(self, enable=True, gpsd_protocol=PROTOCOL, devicepath=None):
         """watch gpsd in various gpsd_protocols or devices.
@@ -73,14 +75,20 @@ class GPSDSocket(object):
         # N.B.: 'timing' requires special attention, as it is undocumented and lives with dragons.
         command = '?WATCH={{"enable":true,"{0}":true}}'.format(gpsd_protocol)
 
-        if gpsd_protocol == 'rare':  # 1 for a channel, gpsd reports the unprocessed NMEA or AIVDM data stream
+        if (
+            gpsd_protocol == "rare"
+        ):  # 1 for a channel, gpsd reports the unprocessed NMEA or AIVDM data stream
             command = command.replace('"rare":true', '"raw":1')
-        if gpsd_protocol == 'raw':  # 2 channel that processes binary data, received data verbatim without hex-dumping.
+        if (
+            gpsd_protocol == "raw"
+        ):  # 2 channel that processes binary data, received data verbatim without hex-dumping.
             command = command.replace('"raw":true', '"raw",2')
         if not enable:
-            command = command.replace('true', 'false')  # sets -all- command values false .
+            command = command.replace(
+                "true", "false"
+            )  # sets -all- command values false .
         if devicepath:
-            command = command.replace('}', ',"device":"') + devicepath + '"}'
+            command = command.replace("}", ',"device":"') + devicepath + '"}'
 
         return self.send(command)
 
@@ -90,11 +98,13 @@ class GPSDSocket(object):
             commands: e.g., '?WATCH={{'enable':true,'json':true}}'|'?VERSION;'|'?DEVICES;'|'?DEVICE;'|'?POLL;'
         """
         try:
-            self.streamSock.send(bytes(commands, encoding='utf-8'))
+            self.streamSock.send(bytes(commands, encoding="utf-8"))
         except TypeError:
             self.streamSock.send(commands)  # 2.7 chokes on 'bytes' and 'encoding='
         except (OSError, IOError) as error:  # HEY MOE, LEAVE THIS ALONE FOR NOW!
-            sys.stderr.write(f'\nAGPS3 send command fail with {error}\n')  # [Errno 107] Transport endpoint is not connected
+            sys.stderr.write(
+                f"\nAGPS3 send command fail with {error}\n"
+            )  # [Errno 107] Transport endpoint is not connected
 
     def __iter__(self):
         """banana"""  # <--- for scale
@@ -109,15 +119,22 @@ class GPSDSocket(object):
         a poll and never blocks.
         """
         try:
-            waitin, _waitout, _waiterror = select.select((self.streamSock,), (), (), timeout)
-            if not waitin: return
+            waitin, _waitout, _waiterror = select.select(
+                (self.streamSock,), (), (), timeout
+            )
+            if not waitin:
+                return
             else:
-                gpsd_response = self.streamSock.makefile()  # '.makefile(buffering=4096)' In strictly Python3
+                gpsd_response = (
+                    self.streamSock.makefile()
+                )  # '.makefile(buffering=4096)' In strictly Python3
                 self.response = gpsd_response.readline()
             return self.response
 
         except StopIteration as error:
-            sys.stderr.write('The readline exception in GPSDSocket.next is--> {}'.format(error))
+            sys.stderr.write(
+                "The readline exception in GPSDSocket.next is--> {}".format(error)
+            )
 
     __next__ = next  # Workaround for changes in iterating between Python 2.7 and 3
 
@@ -133,32 +150,104 @@ class DataStream(object):
     """Retrieve JSON Object(s) from GPSDSocket and unpack it into respective
     object attributes, e.g., self.lat yielding hours of fun and entertainment.
     """
+
     packages = {
-        'VERSION': {'release', 'proto_major', 'proto_minor', 'remote', 'rev'},
-        'TPV': {'alt', 'climb', 'device', 'epc', 'epd', 'eps', 'ept', 'epv', 'epx', 'epy', 'lat', 'lon', 'mode', 'speed', 'tag', 'time', 'track'},
-        'SKY': {'satellites', 'gdop', 'hdop', 'pdop', 'tdop', 'vdop', 'xdop', 'ydop'},
+        "VERSION": {"release", "proto_major", "proto_minor", "remote", "rev"},
+        "TPV": {
+            "alt",
+            "climb",
+            "device",
+            "epc",
+            "epd",
+            "eps",
+            "ept",
+            "epv",
+            "epx",
+            "epy",
+            "lat",
+            "lon",
+            "mode",
+            "speed",
+            "tag",
+            "time",
+            "track",
+        },
+        "SKY": {"satellites", "gdop", "hdop", "pdop", "tdop", "vdop", "xdop", "ydop"},
         # Subset of SKY: \\\'satellites': {'PRN', 'ss', 'el', 'az', 'used'}///  # is always present.
-        'GST': {'alt', 'device', 'lat', 'lon', 'major', 'minor', 'orient', 'rms', 'time'},
+        "GST": {
+            "alt",
+            "device",
+            "lat",
+            "lon",
+            "major",
+            "minor",
+            "orient",
+            "rms",
+            "time",
+        },
         # In 'GST', 'lat' and 'lon' present a name collision and are amended to 'sdlat', 'sdlon',
         # because they are standard deviations of of 'TPV' 'lat' and 'lon'
-        'ATT': {'acc_len', 'acc_x', 'acc_y', 'acc_z', 'depth', 'device', 'dip', 'gyro_x', 'gyro_y', 'heading', 'mag_len', 'mag_st', 'mag_x',
-                'mag_y', 'mag_z', 'pitch', 'pitch_st', 'roll', 'roll_st', 'temperature', 'time', 'yaw', 'yaw_st'},
+        "ATT": {
+            "acc_len",
+            "acc_x",
+            "acc_y",
+            "acc_z",
+            "depth",
+            "device",
+            "dip",
+            "gyro_x",
+            "gyro_y",
+            "heading",
+            "mag_len",
+            "mag_st",
+            "mag_x",
+            "mag_y",
+            "mag_z",
+            "pitch",
+            "pitch_st",
+            "roll",
+            "roll_st",
+            "temperature",
+            "time",
+            "yaw",
+            "yaw_st",
+        },
         # 'POLL': {'active', 'tpv', 'sky', 'time'},
-        'PPS': {'device', 'clock_sec', 'clock_nsec', 'real_sec', 'real_nsec', 'precision'},
-        'TOFF': {'device', 'clock_sec', 'clock_nsec', 'real_sec', 'real_nsec'},
-        'DEVICES': {'devices', 'remote'},
-        'DEVICE': {'activated', 'bps', 'cycle', 'mincycle', 'driver', 'flags', 'native', 'parity', 'path', 'stopbits', 'subtype'},
+        "PPS": {
+            "device",
+            "clock_sec",
+            "clock_nsec",
+            "real_sec",
+            "real_nsec",
+            "precision",
+        },
+        "TOFF": {"device", "clock_sec", "clock_nsec", "real_sec", "real_nsec"},
+        "DEVICES": {"devices", "remote"},
+        "DEVICE": {
+            "activated",
+            "bps",
+            "cycle",
+            "mincycle",
+            "driver",
+            "flags",
+            "native",
+            "parity",
+            "path",
+            "stopbits",
+            "subtype",
+        },
         # 'AIS': {}  # see: http://catb.org/gpsd/AIVDM.html
-        'ERROR': {'message'}}  # TODO: Full suite of possible GPSD output
+        "ERROR": {"message"},
+    }  # TODO: Full suite of possible GPSD output
 
     def __init__(self):
         """Potential data packages from gpsd for a generator of class attributes"""
         for laundry_list in self.packages.values():
             for item in laundry_list:
                 # Fudge around the namespace collision with GST data package lat/lon being standard deviations
-                if laundry_list == 'GST' and item == 'lat' or 'lon':
-                    setattr(self, 'sd' + item, 'n/a')
-                setattr(self, item, 'n/a')
+                if laundry_list == "GST" and item == "lat" or "lon":
+                    setattr(self, "sd" + item, "n/a")
+                setattr(self, item, "n/a")
 
     def unpack(self, gpsd_socket_response):
         """Sets new socket data as DataStream attributes in those initialised dictionaries
@@ -172,16 +261,21 @@ class DataStream(object):
         applies to a lot of things.
         """
         try:
-            fresh_data = json.loads(gpsd_socket_response)  # 'class' is popped for iterator lead
-            class_name = fresh_data.pop('class')
+            fresh_data = json.loads(
+                gpsd_socket_response
+            )  # 'class' is popped for iterator lead
+            class_name = fresh_data.pop("class")
             for key in self.packages[class_name]:
                 # Fudge around the namespace collision with GST data package lat/lon being standard deviations
-                if class_name == 'GST' and key == 'lat' or 'lon':
-                    setattr(self, 'sd' + key, fresh_data.get(key, 'n/a'))
-                setattr(self, key, fresh_data.get(key, 'n/a'))  # Updates and restores 'n/a' if attribute is absent in the data
+                if class_name == "GST" and (key == "lat" or "lon"):
+                    setattr(self, "sd" + key, fresh_data.get(key, "n/a"))
+                else:
+                    setattr(
+                        self, key, fresh_data.get(key, "n/a")
+                    )  # Updates and restores 'n/a' if attribute is absent in the data
 
         except AttributeError:  # 'str' object has no attribute 'keys'
-            sys.stderr.write('There is an unexpected exception unpacking JSON object')
+            sys.stderr.write("There is an unexpected exception unpacking JSON object")
             return
 
         except (ValueError, KeyError) as error:
@@ -189,7 +283,7 @@ class DataStream(object):
             return
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print(__doc__)
 
 #
